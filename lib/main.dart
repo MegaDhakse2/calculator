@@ -1,9 +1,7 @@
 import 'package:flutter/material.dart';
 import 'package:flutter/services.dart';
 
-
-void main()
-{
+void main() {
   runApp(const Calculator());
 }
 
@@ -18,6 +16,7 @@ class Calculator extends StatelessWidget {
     );
   }
 }
+
 class Calci extends StatefulWidget {
   const Calci({Key? key}) : super(key: key);
 
@@ -26,328 +25,273 @@ class Calci extends StatefulWidget {
 }
 
 class _CalciState extends State<Calci> {
+  final inputControll1 = TextEditingController();
 
-  final inputControll1=TextEditingController();
-  final inputControll2=TextEditingController();
-  List<int> input=[];
-  int finall= 0;
-  List<int> list =[];
-   String dum = '';
+  String? pendingOperation;
+  String? previousValue;
+  int? resultValue;
+  bool pressed = false;
 
-  void lists(){
-    int val = int.parse(inputControll1.text);
-    list.add(val);
-    input=list;
-    // print('${list}');
-    for(var i=0; i<list.length;i++)
-      {
-        print(list.join(' + '));
-        // print(list.toString()
-        // .replaceAll(',', ' +')
-        // .replaceAll('[', '')
-        // .replaceAll(']', '')
-        // )
+  int totalValue = 0;
+  List<int> inputList = [];
+
+  void onNumberPress(String numberString) {
+    setState(() {
+      if (pressed == true) {
+        inputControll1.text = '';
+        pressed = false;
       }
-
+      inputControll1.text = '${inputControll1.text}$numberString';
+    });
   }
-    void result(){
-      var sum = 0;
-      for(var i=0; i<list.length; i++){
-        sum=sum-list[i];
+
+  void onOperationPress(String currentOperation) {
+
+    pressed = true;
+
+    if (pendingOperation == null) {
+      pendingOperation = currentOperation;
+      previousValue = inputControll1.text;
+    } else {
+      if (pendingOperation == "add") {
+        resultValue =
+            int.parse(previousValue ?? "") + int.parse(inputControll1.text);
+        print("result: $resultValue");
+      } else if (pendingOperation == "minus") {
+        resultValue =
+            int.parse(previousValue ?? "") - int.parse(inputControll1.text);
+      } else if (pendingOperation == "multiply") {
+        resultValue =
+            int.parse(previousValue ?? "") * int.parse(inputControll1.text);
+      } else if (pendingOperation == "devide") {
+        resultValue =
+            int.parse(previousValue ?? "") ~/ int.parse(inputControll1.text);
       }
-      finall=sum;
-      print(sum);
+
+      previousValue = "$resultValue";
+      pendingOperation = currentOperation;
+
+      inputControll1.text = previousValue??"";
     }
-
-     void clearAll(){
-    list=[];
-    print(list);
-     }
-     void clear(){
-      dum = inputControll1.text;
-      dum = dum.substring(0,dum.length-1);
-      inputControll1.text=dum;
-
-      print(dum);
-     }
-
-
-
-  int sum(){
-    int num1 = int.parse(inputControll1.text);
-    inputControll1.text='';
-
-    return 0;
   }
 
-  int sub(){
-    int num1=int.parse(inputControll1.text);
-    int num2=int.parse(inputControll2.text);
-    return num1 - num2;
+  void clearAll() {
+    inputList.clear();
+    previousValue = '';
+    pendingOperation = null;
+
+    print(inputList);
   }
-  int mul(){
-    int num1=int.parse(inputControll1.text);
-    int num2=int.parse(inputControll2.text);
-    return num1 * num2;
-  }
-  int div(){
-    int num1=int.parse(inputControll1.text);
-    int num2=int.parse(inputControll2.text);
-    return (num1 ~/ num2).floor();
+
+  void clearLast() {
+    inputControll1.text =
+        inputControll1.text.substring(0, inputControll1.text.length - 1);
+
+    print(inputControll1.text);
   }
 
   @override
   Widget build(BuildContext context) {
     return SafeArea(
-        child: Scaffold(
-          resizeToAvoidBottomInset: false,
-          appBar: AppBar(
-            title: const Text('calculator'),
-          ),
-          body:Column(
-            children:  [
-              Container(
-                alignment: Alignment.topRight,
-                // width:150 ,
-                height: 100,
-                child: Text(input.join(' + '),
-                style: const TextStyle(
-                  fontSize: 25,
-                  fontWeight: FontWeight.bold,
-                ),
-                ),
-
-              ), Container(
-                alignment: Alignment.topRight,
-                // width:150 ,
-                height: 100,
-                child: Text(finall.toString(),
+      child: Scaffold(
+        resizeToAvoidBottomInset: false,
+        body: Column(
+          children: [
+            Container(
+              margin: const EdgeInsetsDirectional.all(20),
+              alignment: Alignment.topRight,
+              // width:150 ,
+              height: 100,
+              child: SingleChildScrollView(
+                child: Text(
+                  inputList.join(' + '),
                   style: const TextStyle(
+                    fontSize: 25,
+                    fontWeight: FontWeight.bold,
+                  ),
+                ),
+              ),
+            ),
+            Container(
+              margin: const EdgeInsetsDirectional.only(end: 30),
+              alignment: Alignment.topRight,
+              // width:150 ,
+              height: 100,
+              child: Text(
+                totalValue.toString(),
+                style: const TextStyle(
                   fontSize: 45,
                   fontWeight: FontWeight.w900,
-                    backgroundColor: Colors.grey,
-                ),),
-
+                ),
               ),
-
-
-               Container(
-                 padding: const EdgeInsets.all(20),
-                 child: TextFormField(
-                   controller: inputControll1,
-                  keyboardType: TextInputType.none,
-                   // decoration: const InputDecoration(
-                   //   suffixIcon:Icon(Icons.arrow_back_rounded),
-                  inputFormatters: [FilteringTextInputFormatter.digitsOnly],
-                  decoration:  InputDecoration(
-                    hintText: 'input field 1',
-                    suffixIcon: IconButton(
-                      onPressed: () {
-                        clear();
-                      },
-                      alignment: Alignment.topRight,
-                      icon: const Icon(Icons.arrow_back_rounded),
-                    ),
-
+            ),
+            Container(
+              padding: const EdgeInsets.all(20),
+              child: TextFormField(
+                controller: inputControll1,
+                keyboardType: TextInputType.none,
+                inputFormatters: [FilteringTextInputFormatter.digitsOnly],
+                decoration: InputDecoration(
+                  hintText: "Enter No.'s  here",
+                  suffixIcon: IconButton(
+                    onPressed: () {
+                      clearLast();
+                    },
+                    alignment: Alignment.topRight,
+                    icon: const Icon(Icons.arrow_back_rounded),
                   ),
-                  // child: Text(input1.toString()),
+                ),
               ),
-               ),
-
-              const SizedBox(height: 20,),
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-              OutlinedButton(
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton(
                   onPressed: () {
-                    setState(() {
-                        // inputcontroll1.text='7' ;
-                        inputControll1.text = '${inputControll1.text}7' ;
-                    });
+                    onNumberPress('7');
                   },
                   child: const Text('7'),
-              ),
-              OutlinedButton(
+                ),
+                OutlinedButton(
                   onPressed: () {
-                    setState(() {
-                      inputControll1.text = '${inputControll1.text}8' ;
-                    });
+                    onNumberPress('8');
                   },
                   child: const Text('8'),
-              ),
-              OutlinedButton(
-                onPressed: () {
-                  setState(() {
-                    inputControll1.text= '${inputControll1.text}9';
-                  });
-                },
-                child: const Text('9'),
-              ),
-                  // FloatingActionButton(
-                  //   onPressed: () {
-                  //     setState((){
-                  //       finall=mul();
-                  //     },
-                  //     );
-                  //   },
-                  //   tooltip: 'Multiply',
-                  //   child: const Text('X'),// child:Text(),
-                  // ),
-            ],
-          ),
-              const SizedBox(height: 20,),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-                children: [
-                  OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        inputControll1.text = '${inputControll1.text}4';
-                      });
-                    },
-                    child: const Text('4'),
-                  ),
-                  OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        inputControll1.text = '${inputControll1.text}5';
-
-                      });
-                    },
-                    child: const Text('5'),
-                  ),
-                  OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        inputControll1.text = '${inputControll1.text}6';
-
-                      });
-                    },
-                    child: const Text('6'),
-                  ),
-                  // FloatingActionButton(
-                  //   onPressed: () {
-                  //     setState((){
-                  //       finall=sub();
-                  //     },
-                  //     );
-                  //   },
-                  //   tooltip: 'Subtract',
-                  //   child: const Text('-'),// child:Text(),
-                  // ),
-                ],
-              ),
-              const SizedBox(height: 20,),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-
-                children: [
-                  OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        inputControll1.text = '${inputControll1.text}1';
-
-                      });
-                    },
-                    child: const Text('1'),
-                  ),
-                  OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        inputControll1.text = '${inputControll1.text}2';
-
-                      });
-                    },
-                    child: const Text('2'),
-                  ),OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        inputControll1.text = '${inputControll1.text}3';
-
-                      });
-                    },
-                    child: const Text('3'),
-                  ),
-
-                ],
-              ),
-              const SizedBox(height: 20,),
-
-              Row(
-                mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                children: [
-                  OutlinedButton(
-                    onPressed: () {
-                      setState(() {
-                        inputControll1.text = '${inputControll1.text}0';
-
-                      });
-                    },
-                    child: const Text('0'),
-                  ),
-                  ],
-              ),
-                  const SizedBox(height: 20,),
-                  Row(
-                    mainAxisAlignment: MainAxisAlignment.spaceEvenly,
-                    children: [
-                  ElevatedButton(
-                    onPressed: () {
-                      setState((){
-                        finall=0;
-                        inputControll1.text='';
-                        clearAll();
-                        input=[];
-                      },
-                      );
-                    },
-                    child: const Text('Clear All'),// child:Text(),
-                  ),
-                  FloatingActionButton(
-                    onPressed: () {
-                      setState((){
-                        // finall=sum();
-                        lists();
+                ),
+                OutlinedButton(
+                  onPressed: () {
+                    onNumberPress('9');
+                  },
+                  child: const Text('9'),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton(
+                  onPressed: () {
+                    onNumberPress('4');
+                  },
+                  child: const Text('4'),
+                ),
+                OutlinedButton(
+                  onPressed: () {
+                    onNumberPress('5');
+                  },
+                  child: const Text('5'),
+                ),
+                OutlinedButton(
+                  onPressed: () {
+                    onNumberPress('6');
+                  },
+                  child: const Text('6'),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton(
+                  onPressed: () {
+                    onNumberPress('1');
+                  },
+                  child: const Text('1'),
+                ),
+                OutlinedButton(
+                  onPressed: () {
+                    onNumberPress('2');
+                  },
+                  child: const Text('2'),
+                ),
+                OutlinedButton(
+                  onPressed: () {
+                    onNumberPress('3');
+                  },
+                  child: const Text('3'),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                OutlinedButton(
+                  onPressed: () {
+                    onNumberPress('0');
+                  },
+                  child: const Text('0'),
+                ),
+              ],
+            ),
+            const SizedBox(
+              height: 20,
+            ),
+            Row(
+              mainAxisAlignment: MainAxisAlignment.spaceEvenly,
+              children: [
+                ElevatedButton(
+                  onPressed: () {
+                    setState(
+                      () {
+                        totalValue = 0;
                         inputControll1.text = '';
-
+                        clearAll();
+                        inputList.clear();
                       },
-                      );
-                    },
-                    tooltip: 'Add',
-                    child: const Icon(Icons.add),// child:Text(),
-                  ),
-                  // FloatingActionButton(
-                  //   onPressed: () {
-                  //     setState((){
-                  //       finall=div();
-                  //     },
-                  //     );
-                  //   },
-                  //   tooltip: 'Divide',
-                  //   child: const Text('/'),// child:Text(),
-                  // ),
-                  ElevatedButton(
-                    onPressed: () {
-                      setState((){
-                          result();
+                    );
+                  },
+                  child: const Text('Clear All'),
+                ),
+                FloatingActionButton(
+                  onPressed: () {
+                    setState(
+                      () {
+                        // finall=sum();
+                        onOperationPress("add");
                       },
-                      );
-                    },
-                    child: const Text('Result '),// child:Text(),
-                  ),
-                ],
-              ),
-
-            ],
-          ),
+                    );
+                  },
+                  tooltip: 'Add',
+                  child: const Icon(Icons.add),
+                ),
+                FloatingActionButton(
+                  onPressed: () {
+                    setState(
+                      () {
+                        onOperationPress("minus");
+                      },
+                    );
+                  },
+                  tooltip: 'minus',
+                  child: const Text('-'),
+                ),
+                // ElevatedButton(
+                //   onPressed: () {
+                //     setState(
+                //       () {
+                //         resultAdd();
+                //       },
+                //     );
+                //   },
+                //   child: const Text('Result '),
+                // ),
+              ],
+            ),
+          ],
         ),
+      ),
     );
   }
-
-
-
 }
-
